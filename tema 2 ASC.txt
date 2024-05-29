@@ -1,0 +1,142 @@
+#III.3) (2 puncte) (*)
+
+# 	Translatati in MIPS urmatorul program C (el contine o procedura ce afisaza
+#  frecventa valorilor dintr-un vector de numere de o cifra):
+
+  #include<stdio.h>
+
+#  void frecv(int *v, int n){
+#    int f[10], k;     /* var. k si vect. f se vor aloca automatic pe stiva */
+#    register int i,j; /* i si j se vor aloca in registri */
+#    for(i=0;i<10;++i) f[i]=0;
+#    for(i=0;i<n;++i) if(0<=v[i] && v[i]<10) ++f[v[i]];
+#    k=0; for(i=0;i<10;++i) if(f[i]!=0)++k;
+#    for(i=0;i<10;++i){
+#      printf("%d",f[i]);    /* se va folosi syscall, functia print int */
+#      printf(" ");          /* se va folosi syscall, functia print string */
+#   }
+#    printf("%d",k);         /* se va folosi syscall, functia print int */
+#    printf("\n");           /* se va folosi syscall, functia print string */
+#  }
+
+#  int x[7]={1,2,3,3,3,1,5};
+
+#  void main(){
+#    frecv(x,7);
+#  }
+
+#  /* se va afisa: 0, 2, 1, 3, 0, 1, 0, 0, 0, 0, 4
+#     deoarece 0 apare de 0 ori, 1 de 2 ori, 2 o data, 3 de 3 ori, ...,
+#     9 de 0 ori si sunt 4 frecvente nenule */
+
+
+.data
+    vector: .space 28
+    f1: .space 40 
+    spatiu: .asciiz" "
+    rand: .asciiz"\n"
+.text
+   addi $s0,$zero,1
+   addi $s1,$zero,2
+   addi $s2,$zero,3
+   addi $s3,$zero,3
+   addi $s4,$zero,3
+   addi $s5,$zero,1
+   addi $s6,$zero,5
+   add $t0,$zero,0
+   sw $s0,vector($t0)#vector[0]=1
+   addi $t0,$t0,4
+    sw $s1,vector($t0)#vector[1]=2
+   addi $t0,$t0,4
+    sw $s2,vector($t0)#vector[2]=3
+   addi $t0,$t0,4
+    sw $s3,vector($t0)#vector[3]=3
+   addi $t0,$t0,4
+    sw $s4,vector($t0)#vector[4]=3
+   addi $t0,$t0,4
+    sw $s5,vector($t0)#vector[5]=1
+   addi $t0,$t0,4
+    sw $s6,vector($t0)#vector[6]=5
+   addi $t0,$t0,4
+   
+   addi $s0,$zero,0
+   addi $t3,$zero,0#f1[0]=0
+   sw $s0,f1($t3)
+   addi $t3,$t3,4#f1[1]=0
+   sw $s0,f1($t3)
+   addi $t3,$t3,4#f1[2]=0
+   sw $s0,f1($t3)
+   addi $t3,$t3,4#f1[3]=0
+   sw $s0,f1($t3)
+   addi $t3,$t3,4#f1[4]=0
+   sw $s0,f1($t3)
+   addi $t3,$t3,4#f1[5]=0
+   sw $s0,f1($t3)
+   addi $t3,$t3,4#f1[6]=0
+   sw $s0,f1($t3)
+   addi $t3,$t3,4#f1[7]=0
+   sw $s0,f1($t3)
+   addi $t3,$t3,4#f1[8]=0
+   sw $s0,f1($t3)
+   addi $t3,$t3,4#f1[9]=0
+   sw $s0,f1($t3)
+   
+   addi $t0,$zero,0
+   while:
+      beq $t0,28,exit#for(i=0;i<7;i++)
+      lw $t6,vector($t0)
+      addi $t1,$zero,10
+      addi $t2,$zero,0
+      slt $s0,$t6,$t1
+      beq $s0,$zero,et#if(v[i]<=10)
+      slt $s0,$t2,$t6
+      beq $s0,$zero,et2#if(v[i]>0)
+      addi $t4,$zero,4
+      mult $t6,$t4
+      mflo $v1
+      lw $t5,f1($v1)
+      addi $t5,$t5,1
+      sw $t5,f1($v1)#++f[v[i]]
+      
+      et2:
+      et:
+      
+      addi $t0,$t0,4#i++
+      
+      j while
+   exit:
+     addi $t3,$zero,0 
+     addi $t7,$zero,0 #k=0
+     et3:
+        beq $t3,40,et4#for(i=0;i<10;i++)
+        lw $t8,f1($t3)
+        addi $t0,$zero,0
+        beq $t8,$t0,am#if(f[i]!=0)
+          addi $t7,$t7,1#k++
+         am:
+        addi $t3,$t3,4#i++
+        j et3
+        et4:
+        
+       addi $t3,$zero,0#i=0
+       a1:
+         beq $t3,40,a2#for(i=0;i<10;i++)
+         lw $t8,f1($t3)
+         li $v0,1
+         move $a0,$t8#printf("%d",f[i]);
+         syscall
+         li $v0,4
+         la $a0,spatiu#printf(" ");
+         syscall
+         addi $t3,$t3,4#i++
+         j a1
+         a2:
+         
+         li $v0,4
+         la $a0,rand#printf("\n");
+         syscall
+         li $v0,1
+         move $a0,$t7#printf("%d",k);
+         syscall
+            li $v0,10
+            syscall

@@ -1,0 +1,27 @@
+#II.3) 
+# 	Program care calculeaza suma divizorilor unui numar natural. Numarul este
+# dat intr-o variabila n de tip word declarata cu initializare in program;
+# suma va fi stocata in final intr-o variabila s de tip word.
+
+.data
+   n: .word 6
+   
+.text
+  addi $t0,$zero,1
+  addi $t2,$zero,0
+  lw $t1,n
+  while: 
+       bgt $t0,$t1,exit
+       div $s0,$t1,$t0
+       mult $s0,$t0
+       mflo $v0
+       bne  $v0,$t1,et
+       add $t2,$t2,$t0  
+       et:
+       addi $t0,$t0,1
+       b while
+  exit:
+       li $v0,1
+       add $a0,$t2,$zero
+      
+  syscall
